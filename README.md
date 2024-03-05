@@ -1,3 +1,8 @@
+[![Version](https://img.shields.io/crates/v/goxoy-tar-archive)](https://crates.io/crates/goxoy-tar-archive)
+[![Downloads](https://img.shields.io/crates/d/goxoy-tar-archive)](https://crates.io/crates/goxoy-tar-archive)
+[![License](https://img.shields.io/crates/l/goxoy-file-chunker)](https://crates.io/crates/goxoy-tar-archive)
+[![Docs](https://docs.rs/goxoy-tar-archive/badge.svg)](https://docs.rs/goxoy-tar-archive)
+
 # Goxoy File Archive
 
 Dosyaları TAR dosyası içinde arşivlemeye yarayan kitaplık.
