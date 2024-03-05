@@ -5,16 +5,50 @@ use std::path::{Path, MAIN_SEPARATOR};
 use tar::{Archive, Builder};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Storage {
+pub struct TarArchive {
     pub file_name: String,
 }
 
-impl Storage {
+impl TarArchive {
     pub fn new(archive_file_name: &str) -> Self {
         _ = fs::create_dir("storage_temp");
-        Storage {
+        TarArchive {
             file_name: format!("{}.tar", archive_file_name),
         }
+    }
+    pub fn extract_to_vec(&mut self, file_name: &str) -> Option<Vec<u8>> {
+        let inner_obj = File::open(self.file_name.clone());
+        if inner_obj.is_ok() {
+            let mut arc_obj = Archive::new(inner_obj.unwrap());
+            for inner_file in arc_obj.entries().unwrap() {
+                let mut inner_file_obj = inner_file.unwrap();
+                let inner_file_name = inner_file_obj
+                    .header()
+                    .path()
+                    .unwrap()
+                    .display()
+                    .to_string();
+                if inner_file_name.eq(&file_name.clone()) == true {
+                    let mut s = String::new();
+                    inner_file_obj.read_to_string(&mut s).unwrap();
+                    return Some(s.as_bytes().to_vec());
+                }
+            }
+        }
+        None
+    }
+    pub fn save_to_file(&mut self, file_name: &str, extract_file: &str) -> bool {
+        if Path::new(&extract_file.clone()).exists() == false {
+            let raw_data = self.extract_to_vec(file_name);
+            if raw_data.is_some() {
+                let mut write_file = File::create(extract_file).unwrap();
+                let result = write_file.write_all(&raw_data.unwrap());
+                if result.is_ok() {
+                    return true;
+                }
+            }
+        }
+        false
     }
     pub fn remove_file(&mut self, file_name: &str) -> bool {
         let inner_obj = File::open(self.file_name.clone());
@@ -142,7 +176,7 @@ impl Storage {
 #[test]
 fn full_test() {
     // cargo test  --lib full_test -- --nocapture
-    let mut storage_obj = Storage::new("archive");
+    let mut storage_obj = TarArchive::new("archive");
     let result1 = storage_obj.add_file_with_name("file2.txt", "example.txt");
     let result3 = storage_obj.add_file_with_name("file3.txt", "sky.md");
     let result2 = storage_obj.add_file_with_name("file1.txt", "rust.rtf");
