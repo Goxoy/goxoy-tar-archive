@@ -176,18 +176,33 @@ impl TarArchive {
 #[test]
 fn full_test() {
     // cargo test  --lib full_test -- --nocapture
-    let mut storage_obj = TarArchive::new("archive");
-    let result1 = storage_obj.add_file_with_name("file2.txt", "example.txt");
-    let result3 = storage_obj.add_file_with_name("file3.txt", "sky.md");
-    let result2 = storage_obj.add_file_with_name("file1.txt", "rust.rtf");
+    _ = File::create("file1.txt")
+        .unwrap()
+        .write(b"file 11111111 content [ added   ]");
+
+    _ = File::create("file2.txt")
+        .unwrap()
+        .write(b"file 22222222 content [ updated ]");
+
+    _ = File::create("file3.txt")
+        .unwrap()
+        .write(b"file 33333333 content [ updated ]");
+
+    let mut test_status = false;
+    let mut tar_obj = TarArchive::new("archive");
+    let result1 = tar_obj.add_file_with_name("file2.txt", "example.txt");
+    let result3 = tar_obj.add_file_with_name("file3.txt", "sky.md");
+    let result2 = tar_obj.add_file_with_name("file1.txt", "rust.rtf");
     if result1 == true && result2 == true && result3 == true {
-        let result4 = storage_obj.remove_file("sky.md");
+        let result4 = tar_obj.remove_file("sky.md");
         if result4 == true {
-            assert!(true)
-        } else {
-            assert!(false)
+            test_status = true;
         }
-    } else {
-        assert!(false)
     }
+    _ = fs::remove_file("file1.txt");
+    _ = fs::remove_file("file2.txt");
+    _ = fs::remove_file("file3.txt");
+    _ = fs::remove_file("archive.tar");
+
+    assert!(test_status)
 }
